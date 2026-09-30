@@ -1,0 +1,41 @@
+name: macOS app
+
+# Builds only the default Krokiet binary and uploads Krokiet.app.
+# Does not publish a GitHub release.
+on:
+  workflow_dispatch:
+  push:
+    branches: [macos-app-bundle]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  app:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup env
+        run: |
+          ARCHNAME=$([ "${{ runner.arch }}" = "ARM64" ] && echo arm64 || echo x86_64)
+          echo "ARCHNAME=$ARCHNAME" >> "$GITHUB_ENV"
+
+      - name: Setup rust version
+        run: rustup default 1.94.1
+
+      - name: Install icon rasterizer
+        run: brew install librsvg
+
+      - name: Build Krokiet
+        run: cargo build --release --bin krokiet
+
+      - name: Package Krokiet.app
+        run: bash misc/pack_macos_app.sh target/release/krokiet "mac_krokiet_${ARCHNAME}.app.zip"
+
+      - name: Upload Krokiet.app
+        uses: actions/upload-artifact@v6
+        with:
+          name: Krokiet-${{ env.ARCHNAME }}
+          path: mac_krokiet_${{ env.ARCHNAME }}.app.zip
+          if-no-files-found: error
