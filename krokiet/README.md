@@ -12,6 +12,8 @@ Prebuilt binaries are available for Windows 10/11, Mac and Ubuntu 22.04(base)/24
 
 You can download them from https://github.com/qarmin/czkawka/releases/, which contains recommendations, which variant to use depending on your needs.
 
+On macOS the same page also has `mac_krokiet_<arch>.app.zip`. Unzip it and open `Krokiet.app`. The plain `mac_krokiet_<arch>` binary is still there.
+
 ## Requirements
 
 Prebuilt binaries have no mandatory runtime dependencies.

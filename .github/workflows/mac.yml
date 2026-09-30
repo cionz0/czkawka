@@ -34,7 +34,7 @@ jobs:
 
       - name: Install GTK4
         run: |
-          brew install gtk4 libheif libavif dav1d || true
+          brew install gtk4 libheif libavif dav1d librsvg || true
 
       - name: Build Release
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -107,6 +107,10 @@ jobs:
           bash misc/pack_all_backends.sh mac_krokiet_all_backends_${{ env.ARCHNAME }} mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
           bash misc/pack_all_backends.sh mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }} mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}.zip
 
+      - name: Package Krokiet.app
+        run: |
+          bash misc/pack_macos_app.sh mac_krokiet_${{ env.ARCHNAME }} mac_krokiet_${{ env.ARCHNAME }}.app.zip
+
       - name: Store MacOS
         uses: actions/upload-artifact@v6
         with:
@@ -121,6 +125,7 @@ jobs:
             mac_czkawka_cli_${{ env.ARCHNAME }}
             mac_czkawka_gui_${{ env.ARCHNAME }}
             mac_krokiet_${{ env.ARCHNAME }}
+            mac_krokiet_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
             mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
@@ -140,6 +145,7 @@ jobs:
             mac_czkawka_cli_${{ env.ARCHNAME }}
             mac_czkawka_gui_${{ env.ARCHNAME }}
             mac_krokiet_${{ env.ARCHNAME }}
+            mac_krokiet_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
             mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
