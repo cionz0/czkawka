@@ -110,6 +110,8 @@ jobs:
       - name: Package Krokiet.app
         run: |
           bash misc/pack_macos_app.sh mac_krokiet_${{ env.ARCHNAME }} mac_krokiet_${{ env.ARCHNAME }}.app.zip
+          bash misc/pack_macos_app.sh mac_krokiet_skia_vulkan_${{ env.ARCHNAME }} mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}.app.zip
+          bash misc/pack_macos_app.sh mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }} mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}.app.zip
 
       - name: Store MacOS
         uses: actions/upload-artifact@v6
@@ -128,7 +130,9 @@ jobs:
             mac_krokiet_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
+            mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
+            mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}.app.zip
 
       - name: Release
         if: ${{ github.ref == 'refs/heads/master' && vars.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
@@ -148,5 +152,7 @@ jobs:
             mac_krokiet_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
+            mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
+            mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}.app.zip
           token: ${{ secrets.PAT_REPOSITORY }}

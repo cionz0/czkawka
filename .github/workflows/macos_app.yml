@@ -1,7 +1,7 @@
 name: macOS app
 
-# Builds only the default Krokiet binary and uploads Krokiet.app.
-# Does not publish a GitHub release.
+# Builds the self-contained Krokiet binaries and uploads each Krokiet.app zip.
+# Does not publish a GitHub release. CLI, GTK, and HEIF/AVIF builds are omitted.
 on:
   workflow_dispatch:
   push:
@@ -28,14 +28,26 @@ jobs:
         run: brew install librsvg
 
       - name: Build Krokiet
-        run: cargo build --release --bin krokiet
+        run: |
+          cargo build --release --bin krokiet
+          mv target/release/krokiet "mac_krokiet_${ARCHNAME}"
+          cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
+          mv target/release/krokiet "mac_krokiet_skia_vulkan_${ARCHNAME}"
+          cargo build --release --bin krokiet --no-default-features --features "femtovg_wgpu"
+          mv target/release/krokiet "mac_krokiet_femtovg_wgpu_${ARCHNAME}"
 
       - name: Package Krokiet.app
-        run: bash misc/pack_macos_app.sh target/release/krokiet "mac_krokiet_${ARCHNAME}.app.zip"
+        run: |
+          bash misc/pack_macos_app.sh "mac_krokiet_${ARCHNAME}" "mac_krokiet_${ARCHNAME}.app.zip"
+          bash misc/pack_macos_app.sh "mac_krokiet_skia_vulkan_${ARCHNAME}" "mac_krokiet_skia_vulkan_${ARCHNAME}.app.zip"
+          bash misc/pack_macos_app.sh "mac_krokiet_femtovg_wgpu_${ARCHNAME}" "mac_krokiet_femtovg_wgpu_${ARCHNAME}.app.zip"
 
       - name: Upload Krokiet.app
         uses: actions/upload-artifact@v6
         with:
           name: Krokiet-${{ env.ARCHNAME }}
-          path: mac_krokiet_${{ env.ARCHNAME }}.app.zip
+          path: |
+            mac_krokiet_${{ env.ARCHNAME }}.app.zip
+            mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}.app.zip
+            mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}.app.zip
           if-no-files-found: error

@@ -12,7 +12,7 @@ Prebuilt binaries are available for Windows 10/11, Mac and Ubuntu 22.04(base)/24
 
 You can download them from https://github.com/qarmin/czkawka/releases/, which contains recommendations, which variant to use depending on your needs.
 
-On macOS the same page also has `mac_krokiet_<arch>.app.zip`. Unzip it and open `Krokiet.app`. The plain `mac_krokiet_<arch>` binary is still there.
+On macOS the same page also has a `.app` zip for each self-contained Krokiet build (default, Skia Vulkan, femtovg wgpu): `mac_krokiet_<arch>.app.zip` and the matching `mac_krokiet_skia_vulkan_` / `mac_krokiet_femtovg_wgpu_` zips. Unzip one and open `Krokiet.app`. The plain binary is still there. CLI, GTK, and HEIF/AVIF builds stay single files.
 
 ## Requirements
 
