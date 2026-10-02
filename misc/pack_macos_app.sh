@@ -1,22 +1,32 @@
 #!/bin/sh
-# Packages a krokiet Mach-O binary into a double-clickable macOS .app and zips it.
+# Packages a macOS GUI Mach-O into a double-clickable .app and zips it.
 #
-# Usage: pack_macos_app.sh <binary> <output_zip>
-#   binary      - path to the compiled krokiet binary
-#   output_zip  - path of the zip to create (overwritten). Contains Krokiet.app.
+# Usage: pack_macos_app.sh <binary> <output_zip> [app_name] [bundle_id]
+#   binary      - compiled GUI binary
+#   output_zip  - zip to create (overwritten). Contains <app_name>.app.
+#   app_name    - Finder name, default Krokiet. A name starting with Czkawka
+#                 stores the binary as czkawka_gui; anything else as krokiet.
+#   bundle_id   - CFBundleIdentifier, default pl.Qarmin.Krokiet
 #
-# The bundle is ad-hoc signed so Launch Services accepts it on the build machine.
-# A copy downloaded from the internet is still unidentified to Gatekeeper; the
-# first launch needs the Finder context menu "Open".
+# The bundle is ad-hoc signed. A download is still unidentified to Gatekeeper;
+# the first launch needs the Finder context menu "Open".
+# The launcher prepends Homebrew to PATH so double-click can see ffmpeg.
 set -eu
 
-if [ "$#" -ne 2 ]; then
-    echo "usage: pack_macos_app.sh <binary> <output_zip>" >&2
+if [ "$#" -lt 2 ] || [ "$#" -gt 4 ]; then
+    echo "usage: pack_macos_app.sh <binary> <output_zip> [app_name] [bundle_id]" >&2
     exit 1
 fi
 
 BINARY="$1"
 OUTPUT_ZIP="$2"
+APP_NAME="${3:-Krokiet}"
+BUNDLE_ID="${4:-pl.Qarmin.Krokiet}"
+
+case "$APP_NAME" in
+    Czkawka*) EXEC_NAME="czkawka_gui" ;;
+    *) EXEC_NAME="krokiet" ;;
+esac
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 REPO_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
@@ -30,14 +40,25 @@ WORKDIR=$(mktemp -d)
 # shellcheck disable=SC2064
 trap "rm -rf '$WORKDIR'" EXIT
 
-APP="$WORKDIR/Krokiet.app"
+APP="$WORKDIR/$APP_NAME.app"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
-cp "$BINARY" "$APP/Contents/MacOS/krokiet"
-chmod +x "$APP/Contents/MacOS/krokiet"
+cp "$BINARY" "$APP/Contents/MacOS/$EXEC_NAME.bin"
+chmod +x "$APP/Contents/MacOS/$EXEC_NAME.bin"
 # cp keeps the quarantine xattr of a downloaded binary, which makes Gatekeeper
 # reject the bundle even after it is signed.
-xattr -c "$APP/Contents/MacOS/krokiet" 2>/dev/null || true
+xattr -c "$APP/Contents/MacOS/$EXEC_NAME.bin" 2>/dev/null || true
+
+# Launch Services starts the app with a minimal PATH, so Homebrew ffmpeg
+# would be invisible. The shell inherits the user's PATH when they run the
+# naked binary from a terminal.
+cat > "$APP/Contents/MacOS/$EXEC_NAME" <<EOF
+#!/bin/sh
+DIR=\$(CDPATH= cd -- "\$(dirname "\$0")" && pwd)
+export PATH="/opt/homebrew/bin:/usr/local/bin:\${PATH:-/usr/bin:/bin:/usr/sbin:/sbin}"
+exec "\$DIR/$EXEC_NAME.bin" "\$@"
+EOF
+chmod +x "$APP/Contents/MacOS/$EXEC_NAME"
 
 cat > "$APP/Contents/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -45,13 +66,13 @@ cat > "$APP/Contents/Info.plist" <<EOF
 <plist version="1.0">
 <dict>
   <key>CFBundleName</key>
-  <string>Krokiet</string>
+  <string>${APP_NAME}</string>
   <key>CFBundleDisplayName</key>
-  <string>Krokiet</string>
+  <string>${APP_NAME}</string>
   <key>CFBundleIdentifier</key>
-  <string>pl.Qarmin.Krokiet</string>
+  <string>${BUNDLE_ID}</string>
   <key>CFBundleExecutable</key>
-  <string>krokiet</string>
+  <string>${EXEC_NAME}</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleVersion</key>
@@ -112,6 +133,8 @@ iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns"
 plutil -lint "$APP/Contents/Info.plist" >/dev/null
 
 # Ad-hoc signature. No Apple Developer certificate.
+# Sign the Mach-O first; the bundle executable is a shell launcher.
+codesign --force --sign - "$APP/Contents/MacOS/$EXEC_NAME.bin"
 codesign --force --sign - "$APP"
 codesign --verify --strict "$APP"
 

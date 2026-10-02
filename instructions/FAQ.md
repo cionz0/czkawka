@@ -113,14 +113,14 @@ Per platform:
 
 - **Linux**: download `linux_krokiet_x86_64` (or `_arm64`), `chmod +x` it, and run. For HEIF/AVIF/RAW use a `heif_raw_avif` build and install the matching libs (or just run `sudo misc/install_scripts/install_linux.sh`). The GTK GUI needs GTK4 installed.
 - **Windows**: download a `windows_krokiet_on_*` build and run the `.exe` - no runtime to install for the core app. Install `ffmpeg` (e.g. `winget install Gyan.FFmpeg` or `misc/install_scripts/install_windows.bat`) only if you need Similar Videos.
-- **macOS**: download a self-contained Krokiet `.app` zip for Apple Silicon (`arm64`) or Intel (`x86_64`): `mac_krokiet_<arch>.app.zip` (default), `mac_krokiet_skia_vulkan_<arch>.app.zip`, or `mac_krokiet_femtovg_wgpu_<arch>.app.zip`. Unzip it and open `Krokiet.app`. The matching raw binary is still published:
+- **macOS**: for a GUI build, download the matching `.app.zip` (Apple Silicon `arm64`, or Intel `x86_64` when that build exists), unzip it, and double-click the app. Krokiet zips are `mac_krokiet_<arch>.app.zip` and the Skia, femtovg, all-backends, and HEIF/AVIF variants. The GTK GUI zips are `mac_czkawka_gui_<arch>.app.zip` and `mac_czkawka_gui_heif_avif_<arch>.app.zip`. The raw binary is still published next to each app:
 
   ```bash
   chmod +x mac_krokiet_arm64
   ./mac_krokiet_arm64
   ```
 
-  If macOS says "cannot be opened because it is from an unidentified developer", right-click `Krokiet.app` (or the raw binary) and choose "Open", then confirm. If the raw binary opens as text in TextEdit, the executable bit is not set - run `chmod +x` first. For optional codecs use a `heif_avif` build and `brew install ffmpeg libheif libavif libraw` (or run `misc/install_scripts/install_macos.sh`). Those HEIF/AVIF builds, the CLI, and the GTK GUI stay single files. The GTK GUI (`mac_czkawka_gui_*`) additionally needs `brew install gtk4`.
+  If macOS says "cannot be opened because it is from an unidentified developer", right-click the app and choose "Open", then confirm. If you run the raw binary and it opens as text in TextEdit, the executable bit is not set - run `chmod +x` first. HEIF/AVIF apps still need `brew install ffmpeg libheif libavif libraw` (or `misc/install_scripts/install_macos.sh`). The GTK app still needs `brew install gtk4`. The CLI (`mac_czkawka_cli_*`) stays a terminal program, not an app.
 
 ### Q: Which Linux packages are available?
 

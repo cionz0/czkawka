@@ -107,11 +107,23 @@ jobs:
           bash misc/pack_all_backends.sh mac_krokiet_all_backends_${{ env.ARCHNAME }} mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
           bash misc/pack_all_backends.sh mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }} mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}.zip
 
-      - name: Package Krokiet.app
+      - name: Package macOS apps
         run: |
-          bash misc/pack_macos_app.sh mac_krokiet_${{ env.ARCHNAME }} mac_krokiet_${{ env.ARCHNAME }}.app.zip
-          bash misc/pack_macos_app.sh mac_krokiet_skia_vulkan_${{ env.ARCHNAME }} mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}.app.zip
-          bash misc/pack_macos_app.sh mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }} mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}.app.zip
+          set -eu
+          pack() {
+            bash misc/pack_macos_app.sh "$1" "$1.app.zip" "$2" "$3"
+          }
+          A="${ARCHNAME}"
+          pack "mac_krokiet_${A}" "Krokiet" "pl.Qarmin.Krokiet"
+          pack "mac_krokiet_skia_vulkan_${A}" "Krokiet Skia Vulkan" "pl.Qarmin.Krokiet.SkiaVulkan"
+          pack "mac_krokiet_femtovg_wgpu_${A}" "Krokiet femtovg wgpu" "pl.Qarmin.Krokiet.FemtovgWgpu"
+          pack "mac_krokiet_all_backends_${A}" "Krokiet All Backends" "pl.Qarmin.Krokiet.AllBackends"
+          pack "mac_krokiet_heif_avif_${A}" "Krokiet HEIF AVIF" "pl.Qarmin.Krokiet.HeifAvif"
+          pack "mac_krokiet_skia_vulkan_heif_avif_${A}" "Krokiet Skia Vulkan HEIF AVIF" "pl.Qarmin.Krokiet.SkiaVulkan.HeifAvif"
+          pack "mac_krokiet_heif_avif_femtovg_wgpu_${A}" "Krokiet femtovg wgpu HEIF AVIF" "pl.Qarmin.Krokiet.FemtovgWgpu.HeifAvif"
+          pack "mac_krokiet_heif_avif_all_backends_${A}" "Krokiet All Backends HEIF AVIF" "pl.Qarmin.Krokiet.AllBackends.HeifAvif"
+          pack "mac_czkawka_gui_${A}" "Czkawka" "pl.Qarmin.Czkawka"
+          pack "mac_czkawka_gui_heif_avif_${A}" "Czkawka HEIF AVIF" "pl.Qarmin.Czkawka.HeifAvif"
 
       - name: Store MacOS
         uses: actions/upload-artifact@v6
@@ -119,16 +131,23 @@ jobs:
           name: all-${{ runner.os }}-${{ runner.arch }}-${{ env.VERS }}
           path: |
             mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
+            mac_krokiet_all_backends_${{ env.ARCHNAME }}.app.zip
             mac_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
             mac_czkawka_gui_heif_avif_${{ env.ARCHNAME }}
+            mac_czkawka_gui_heif_avif_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_heif_avif_${{ env.ARCHNAME }}
+            mac_krokiet_heif_avif_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_heif_avif_femtovg_wgpu_${{ env.ARCHNAME }}
+            mac_krokiet_heif_avif_femtovg_wgpu_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}.zip
+            mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}.app.zip
             mac_czkawka_cli_${{ env.ARCHNAME }}
             mac_czkawka_gui_${{ env.ARCHNAME }}
+            mac_czkawka_gui_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_${{ env.ARCHNAME }}
             mac_krokiet_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
+            mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
@@ -141,16 +160,23 @@ jobs:
           tag_name: "Nightly"
           files: |
             mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
+            mac_krokiet_all_backends_${{ env.ARCHNAME }}.app.zip
             mac_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
             mac_czkawka_gui_heif_avif_${{ env.ARCHNAME }}
+            mac_czkawka_gui_heif_avif_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_heif_avif_${{ env.ARCHNAME }}
+            mac_krokiet_heif_avif_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_heif_avif_femtovg_wgpu_${{ env.ARCHNAME }}
+            mac_krokiet_heif_avif_femtovg_wgpu_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}.zip
+            mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}.app.zip
             mac_czkawka_cli_${{ env.ARCHNAME }}
             mac_czkawka_gui_${{ env.ARCHNAME }}
+            mac_czkawka_gui_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_${{ env.ARCHNAME }}
             mac_krokiet_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
+            mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
