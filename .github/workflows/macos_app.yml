@@ -1,7 +1,8 @@
 name: macOS app
 
-# Builds the macOS GUI binaries and uploads a double-clickable .app zip for each.
-# Does not publish a GitHub release. The CLI stays a naked binary and is not built here.
+# Builds current macOS Krokiet binaries and uploads a double-clickable .app zip for each.
+# Skips the deprecated GTK GUI and the deprecated macOS OpenGL (default femtovg) build.
+# Does not publish a GitHub release. The CLI is not built here.
 on:
   workflow_dispatch:
   push:
@@ -25,25 +26,19 @@ jobs:
         run: rustup default 1.94.1
 
       - name: Install libraries
-        run: brew install gtk4 libheif libavif dav1d librsvg
+        run: brew install libheif libavif dav1d librsvg
 
       - name: Build GUI binaries
         run: |
           set -eu
           export LIBRARY_PATH="${LIBRARY_PATH:-}:$(brew --prefix)/lib"
           A="${ARCHNAME}"
-          cargo build --release -p krokiet -p czkawka_gui
-          mv target/release/krokiet "mac_krokiet_${A}"
-          mv target/release/czkawka_gui "mac_czkawka_gui_${A}"
           cargo build --release -p krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
           mv target/release/krokiet "mac_krokiet_skia_vulkan_${A}"
           cargo build --release -p krokiet --no-default-features --features "femtovg_wgpu"
           mv target/release/krokiet "mac_krokiet_femtovg_wgpu_${A}"
           cargo build --release -p krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu"
           mv target/release/krokiet "mac_krokiet_all_backends_${A}"
-          cargo build --release -p krokiet -p czkawka_gui --features "heif,libavif"
-          mv target/release/krokiet "mac_krokiet_heif_avif_${A}"
-          mv target/release/czkawka_gui "mac_czkawka_gui_heif_avif_${A}"
           cargo build --release -p krokiet --no-default-features --features "winit_skia_vulkan,winit_software,heif,libavif"
           mv target/release/krokiet "mac_krokiet_skia_vulkan_heif_avif_${A}"
           cargo build --release -p krokiet --no-default-features --features "femtovg_wgpu,heif,libavif"
@@ -58,30 +53,22 @@ jobs:
             bash misc/pack_macos_app.sh "$1" "$1.app.zip" "$2" "$3"
           }
           A="${ARCHNAME}"
-          pack "mac_krokiet_${A}" "Krokiet" "pl.Qarmin.Krokiet"
           pack "mac_krokiet_skia_vulkan_${A}" "Krokiet Skia Vulkan" "pl.Qarmin.Krokiet.SkiaVulkan"
           pack "mac_krokiet_femtovg_wgpu_${A}" "Krokiet femtovg wgpu" "pl.Qarmin.Krokiet.FemtovgWgpu"
           pack "mac_krokiet_all_backends_${A}" "Krokiet All Backends" "pl.Qarmin.Krokiet.AllBackends"
-          pack "mac_krokiet_heif_avif_${A}" "Krokiet HEIF AVIF" "pl.Qarmin.Krokiet.HeifAvif"
           pack "mac_krokiet_skia_vulkan_heif_avif_${A}" "Krokiet Skia Vulkan HEIF AVIF" "pl.Qarmin.Krokiet.SkiaVulkan.HeifAvif"
           pack "mac_krokiet_heif_avif_femtovg_wgpu_${A}" "Krokiet femtovg wgpu HEIF AVIF" "pl.Qarmin.Krokiet.FemtovgWgpu.HeifAvif"
           pack "mac_krokiet_heif_avif_all_backends_${A}" "Krokiet All Backends HEIF AVIF" "pl.Qarmin.Krokiet.AllBackends.HeifAvif"
-          pack "mac_czkawka_gui_${A}" "Czkawka" "pl.Qarmin.Czkawka"
-          pack "mac_czkawka_gui_heif_avif_${A}" "Czkawka HEIF AVIF" "pl.Qarmin.Czkawka.HeifAvif"
 
       - name: Upload macOS apps
         uses: actions/upload-artifact@v6
         with:
           name: macos-apps-${{ env.ARCHNAME }}
           path: |
-            mac_krokiet_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_all_backends_${{ env.ARCHNAME }}.app.zip
-            mac_krokiet_heif_avif_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_heif_avif_femtovg_wgpu_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}.app.zip
-            mac_czkawka_gui_${{ env.ARCHNAME }}.app.zip
-            mac_czkawka_gui_heif_avif_${{ env.ARCHNAME }}.app.zip
           if-no-files-found: error
